@@ -246,7 +246,7 @@ const _e3=end;
 end=function(){clearT();_e3();sync();document.querySelector('.card').insertAdjacentHTML('afterend','<div class="card"><h3>🏁 우리 반 최종 순위</h3><div id="fr">'+rankHtml(G.rows,true)+'</div></div>')};
 /* ===== v4: GitHub용 · 구글 시트(Apps Script) 연동 · 킬러 문항 ===== */
 // ★ 여기에 Apps Script 웹 앱 URL(…/exec)을 붙여넣으세요
-const API_URL='';
+const API_URL='https://script.google.com/macros/s/AKfycbzZ-5XVsjaFAMtFHSBTqTVDXNOU98P-gNAlSufY1mNn2b2mVJipuE0ek7PjxixTTyR_OA/exec';
 sync=function(){clearTimeout(syncT);syncT=setTimeout(()=>{if(!API_URL||!S.team||!S.room)return;fetch(API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({room:sx(S.room),name:S.team,score:S.score,round:S.round,members:(S.ids||[]).join(', ')})}).catch(()=>{})},300)};
 listen=function(code,cb){if(!API_URL){cb(null);return()=>{}}const f=async()=>{try{const r=await fetch(API_URL+'?room='+encodeURIComponent(sx(code)));cb(await r.json())}catch(e){cb(null)}};f();const id=setInterval(f,4000);return()=>clearInterval(id)};
 dl=function(rows){const csv='\ufeff순위,모둠,점수\n'+[...rows].sort((a,b)=>b.score-a.score).map((r,i)=>`${i+1},"${r.name}",${r.score}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='모둠순위.csv';a.click()};
