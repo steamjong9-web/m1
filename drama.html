@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>생명탐험대 2차시: 상황극 스튜디오</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fdf4e7;--card:#fff;--ink:#2b2433;--sub:#6e6577;--pu:#7a4fd0;--yel:#ffcf3d;--cor:#ef5d4a;--ok:#1d9b62;--line:#e6d9c6}
+@media (prefers-color-scheme:dark){:root{--bg:#1d1827;--card:#2a2338;--ink:#f4eefc;--sub:#b8abc9;--pu:#a98bf0;--line:#463a5c}}
+*{box-sizing:border-box}html{height:100%}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif;line-height:1.6;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+h1,h2,h3,.jua{font-family:'Jua',sans-serif;font-weight:400}h1{font-size:36px;margin:6px 0}h2{font-size:25px;margin:0 0 8px}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.sub{color:var(--sub)}.tag{display:inline-block;font-family:'Jua';background:var(--pu);color:#fff;border-radius:8px;padding:1px 12px;margin-bottom:6px}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--pu);color:#fff;border:0;border-radius:12px;padding:11px 20px;font-family:'Jua';font-size:19px;box-shadow:0 4px 0 rgba(0,0,0,.25);margin:3px}
+.btn:active{transform:translateY(3px);box-shadow:none}.btn.y{background:var(--yel);color:#3a2b00}.btn.c{background:var(--cor)}.btn:disabled{opacity:.4}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:12px;margin:8px 0;font-size:17px}
+.opt.good{border-color:var(--ok);background:rgba(29,155,98,.16)}.opt.bad{border-color:var(--cor);background:rgba(239,93,74,.14)}
+input[type=text]{font:inherit;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--card);color:var(--ink);width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.pill{background:var(--yel);color:#3a2b00;border-radius:99px;padding:3px 14px;font-family:'Jua';font-size:18px}
+.stage{background:linear-gradient(#efe4ff,#e2d3fb);border-radius:14px;padding:12px;min-height:150px;color:#2b2433}
+.speak{display:flex;gap:10px;align-items:flex-start;margin:8px 0;animation:in .4s}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.bub{background:#fff;border:2px solid #cdbbf0;border-radius:14px;padding:8px 12px;flex:1;font-size:17px;color:#2b2433}
+.bub b{display:block;font-family:'Jua';font-weight:400;color:#7a4fd0;font-size:15px}
+.chip{display:inline-block;background:var(--bg);border:2px solid var(--line);border-radius:10px;padding:2px 10px;margin:2px;font-size:14px}
+.fb{border-radius:12px;padding:10px 14px;margin-top:10px}.fb.good{background:rgba(29,155,98,.16)}.fb.bad{background:rgba(239,93,74,.14)}
+.line{display:flex;gap:10px;align-items:flex-start;border-bottom:1px dashed var(--line);padding:8px 0}.line .who{min-width:92px;text-align:center;font-size:13px}
+.bar{height:14px;background:var(--line);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .08s}
+#tm{font-family:'Jua';font-size:34px}.hurry{color:var(--cor);animation:hr .5s infinite}@keyframes hr{50%{transform:scale(1.15)}}
+label.ck{display:block;padding:8px 10px;border:2px solid var(--line);border-radius:10px;margin:6px 0;font-size:17px}
+.conf{position:fixed;top:-14px;width:10px;height:14px;z-index:99;pointer-events:none;animation:fall 1.8s linear forwards}@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+</style></head><body><div class="wrap" id="app"></div>
+<script>
+// ★ 장면별 영상이 있으면 주소를 넣으세요. 예) {1:'videos/s1.mp4', 2:'https://www.youtube.com/embed/영상ID'}  없으면 만화형 컷신이 나와요.
+const VIDEO={};
+const CH={토끼:'#ef7b6a',여우:'#5b8def',하마:'#f2b632',보건샘:'#3aa57a',낯선계정:'#8a8f99'};
+const NM={보건샘:'보건 선생님',낯선계정:'모르는 계정'};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const mouth={happy:'M20 38Q30 48 40 38',worry:'M21 44Q30 36 39 44',smirk:'M22 40Q32 44 40 36',angry:'M21 44Q30 38 39 44',calm:'M22 40H38'};
+const ear=n=>{const c=CH[n];return {토끼:`<ellipse cx="20" cy="9" rx="5" ry="12" fill="${c}"/><ellipse cx="40" cy="9" rx="5" ry="12" fill="${c}"/>`,여우:`<path d="M9 24L13 2L28 13ZM51 24L47 2L32 13Z" fill="${c}"/>`,하마:`<circle cx="13" cy="15" r="6" fill="${c}"/><circle cx="47" cy="15" r="6" fill="${c}"/>`,보건샘:'<rect x="19" y="3" width="22" height="11" rx="4" fill="#fff" stroke="#bbb"/><path d="M30 5v7M26.5 8.5h7" stroke="#e33" stroke-width="2"/>'}[n]||''};
+const face=(n,m='calm',w=60)=>`<svg viewBox="0 0 60 60" width="${w}">${ear(n)}<circle cx="30" cy="32" r="23" fill="${CH[n]}"/><circle cx="21" cy="28" r="3" fill="#2b2433"/><circle cx="39" cy="28" r="3" fill="#2b2433"/>${m==='angry'?'<path d="M15 20L26 24M45 20L34 24" stroke="#2b2433" stroke-width="3"/>':''}${m==='worry'?'<path d="M16 22L26 20M44 22L34 20" stroke="#2b2433" stroke-width="2.5"/>':''}<path d="${mouth[m]}" stroke="#2b2433" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+const SC=[
+{t:'교실에서 갑자기 월경이 시작됐어요',sub:'수업 시간, 토끼가 하마에게 조용히 말합니다. 여우도 눈치를 챘어요.',
+beats:[['토끼','worry','하마아… 나 갑자기 생리가 시작한 것 같아. 어떡하지?'],['여우','smirk','야, 토끼 얼굴이 왜 그래? 무슨 일 있어?'],['하마','calm','(토끼의 표정을 보며) 어떻게 도와주면 좋을까?']],
+q:'하마의 가장 좋은 행동은?',o:['"토끼 생리한대!" 하고 큰 소리로 알린다','조용히 괜찮다고 말해 주고, 보건실에 같이 가서 도움을 요청한다','모른 척하고 앉아 있는다'],a:1,why:'월경은 자연스러운 몸의 변화예요. 친구의 사생활을 지켜 주고 필요한 도움을 연결해 주는 것이 존중이에요.',
+model:[['하마','happy','괜찮아, 아무도 몰라. 나랑 같이 보건실에 가자.'],['여우','calm','무슨 일이야?'],['하마','calm','별일 아니야. 우리 잠깐 나갔다 올게.'],['보건샘','happy','잘 왔어요. 생리대가 필요하죠? 여기 있어요. 몸이 불편하면 쉬어도 돼요.'],['토끼','happy','고마워, 하마아. 네가 있어서 든든해.']],
+free:'💬 자유 대사: 여우가 놀리려고 하면 하마는 어떻게 말할까요? 한 줄 만들어 보세요.'},
+{t:'내 몸에 대한 불쾌한 농담',sub:'쉬는 시간, 여우가 토끼의 몸 변화를 보고 농담을 합니다.',
+beats:[['여우','smirk','야 토끼, 너 요즘 몸이 많이 변했다? ㅋㅋㅋ'],['토끼','worry','…'],['하마','angry','(토끼가 불편해 보여…)']],
+q:'토끼의 가장 좋은 대응은?',o:['같이 웃어 넘긴다','"그 말 기분 나빠. 내 몸으로 농담하지 마."라고 분명히 말한다','똑같이 놀려서 되갚는다'],a:1,why:'불쾌하다는 마음을 분명한 말로 표현하는 것은 내 몸을 지키는 일이에요. 반복되면 믿을 수 있는 어른에게 알려요.',
+model:[['토끼','angry','그 말 기분 나빠. 내 몸 가지고 농담하지 마.'],['여우','smirk','장난인데 뭘 그래.'],['토끼','angry','나는 장난으로 안 들려. 그만해.'],['하마','calm','맞아, 그런 말은 하면 안 돼.'],['보건샘','calm','무슨 일이니? 서로 존중하는 말을 쓰자. 힘들면 언제든 선생님께 얘기하렴.']],
+free:'💬 자유 대사: 여우가 계속 놀리면 토끼는 어떤 행동을 할 수 있을까요?'},
+{t:'"장난이야"라며 계속되는 신체 접촉',sub:'여우가 장난이라며 토끼의 몸을 자꾸 만집니다. 토끼는 싫다고 말했어요.',
+beats:[['여우','smirk','에이, 장난이야~'],['토끼','angry','싫다고 했잖아. 하지 마.'],['여우','smirk','그냥 장난인데 왜 그래?']],
+q:'토끼가 해야 할 행동으로 가장 알맞은 것은?',o:['장난이니까 참는다','분명히 거절하고 자리를 피한 뒤, 믿을 수 있는 어른에게 알린다','나도 똑같이 한다'],a:1,why:'내가 싫으면 장난이 아니에요. 몸의 주인은 나이고, 거절은 언제든 할 수 있어요. 도움이 필요하면 청소년전화 1388에도 연락할 수 있어요.',
+model:[['토끼','angry','싫어. 만지지 마.'],['여우','smirk','장난인데 왜 그래?'],['토끼','angry','내가 싫으면 장난이 아니야. 그만해.'],['하마','calm','토끼야, 우리 선생님께 같이 가자.'],['보건샘','calm','말해 줘서 고마워요. 네 잘못이 아니에요. 선생님이 함께 해결할게요.']],
+free:'💬 자유 대사: 거절이 어려울 때 쓸 수 있는 말을 한 줄 더 만들어 보세요.'},
+{t:'동의 없이 올라온 단톡방 사진',sub:'여우가 하마의 사진을 놀리는 글과 함께 단톡방에 올렸어요.',
+beats:[['하마','worry','어? 내 사진이 단톡방에 올라와 있어… 놀리는 글까지!'],['여우','smirk','웃기잖아~ 다들 좋아하는데?'],['토끼','angry','(하마가 속상해 보여…)']],
+q:'가장 좋은 대응 순서는?',o:['같이 웃으며 다른 사진도 올린다','화면을 캡처해 두고, 삭제를 요청한 뒤, 믿을 수 있는 어른에게 알린다','혼자 참고 아무에게도 말하지 않는다'],a:1,why:'동의 없이 사진이나 글을 퍼뜨리는 것은 피해를 주는 행동이고, 내용에 따라 법적 문제가 될 수 있어요. 증거를 남기고 어른에게 도움을 청하세요.',
+model:[['하마','angry','내 동의 없이 올린 사진, 지금 삭제해 줘.'],['여우','smirk','다들 웃는데 뭘 그래.'],['토끼','angry','웃을 일이 아니야. 이건 하면 안 되는 행동이야.'],['토끼','calm','하마아, 화면부터 캡처해 두고 선생님께 같이 가자.'],['보건샘','calm','잘 알려 줬어요. 증거를 잘 남겼네요. 삭제하고 함께 해결해 봐요.']],
+free:'💬 자유 대사: 단톡방 친구들에게 한마디 한다면?'},
+{t:'온라인에서 모르는 사람이 사진을 요구해요',sub:'토끼에게 모르는 계정이 말을 겁니다. 하마가 옆에서 화면을 봤어요.',
+beats:[['낯선계정','calm','안녕~ 너 예쁘다. 사진 한 장만 보내 줄래?'],['토끼','worry','어… 모르는 사람인데 어떡하지?'],['하마','worry','잠깐, 그거 위험한 거 아니야?']],
+q:'가장 알맞은 대응은?',o:['한 장만 보낸다','단호히 거절하고 대화를 끊고 차단한 뒤, 화면을 남기고 어른이나 1388에 알린다','계속 대화하며 상대가 누군지 알아본다'],a:1,why:'내 몸 사진은 누구에게도 보내지 않아도 돼요. 거절하고 대화를 끊은 뒤 보호자·선생님·1388에 알리세요.',
+model:[['토끼','angry','안 보낼 거예요. 그런 말은 하지 마세요.'],['하마','calm','바로 차단하고 화면은 캡처해 두자.'],['토끼','calm','응, 차단했어. 선생님께 알려야겠어.'],['보건샘','happy','정말 잘 대처했어요. 이런 일이 생기면 보호자나 선생님, 청소년전화 1388에 꼭 알리세요.']],
+free:'💬 자유 대사: 친구가 비슷한 일을 겪는다면 어떤 말을 해 줄까요?'}];
+const G={};let T={team:'',mem:[],sel:[],k:0,score:0,res:[]};
+function fx(ok){try{const a=G.a||(G.a=new (window.AudioContext||window.webkitAudioContext)()),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type=ok?'triangle':'sawtooth';o.frequency.value=ok?660:200;g.gain.value=.06;o.start();if(ok)o.frequency.setValueAtTime(880,a.currentTime+.12);o.stop(a.currentTime+.25)}catch(e){}
+if(ok)for(let i=0;i<30;i++){const d=document.createElement('div');d.className='conf';d.style.left=Math.random()*100+'vw';d.style.background=['#ffcf3d','#ef5d4a','#7a4fd0','#1d9b62'][i%4];d.style.animationDelay=Math.random()*.4+'s';document.body.appendChild(d);setTimeout(()=>d.remove(),2400)}}
+function tick(h){try{const a=G.a||(G.a=new (window.AudioContext||window.webkitAudioContext)()),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type='square';o.frequency.value=h?1500:850;g.gain.setValueAtTime(.05,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.08);o.start();o.stop(a.currentTime+.09)}catch(e){}}
+function clr(){clearInterval(G.t);clearInterval(G.c)}
+function countdown(sec,done){clr();const t0=Date.now();let last=-1;G.t=setInterval(()=>{const l=sec-(Date.now()-t0)/1000,e=document.getElementById('tm');if(!e){clr();return}e.textContent='⏱ '+Math.max(0,Math.ceil(l));e.classList.toggle('hurry',l<=10);const k=Math.ceil(l);if(k!==last&&l>0){last=k;tick(l<=10)}if(l<=0){clr();done()}},100)}
+const head=()=>`<div class="top"><b class="jua" style="font-size:20px">🎭 ${esc(T.team)}</b><span class="pill">⭐ ${T.score}점</span></div>`;
+const sc=()=>SC[T.sel[T.k]];
+const add=n=>{T.score+=n};
+function intro(){clr();micOff();T={team:'',mem:[],sel:[],k:0,score:0,res:[]};
+$('app').innerHTML=`<div class="card"><div class="tag">2차시 · 상황극 게임</div><h1>🎭 상황극 스튜디오</h1><p class="sub">컷신을 보고 → 최선의 행동을 고르고 → 대본으로 직접 연기해 보는 모둠 게임이에요. 이 화면의 이름은 저장되지 않아요.</p>
+<input type="text" id="tn" placeholder="모둠 이름" maxlength="12"><p class="sub" style="margin:8px 0 4px">대원 이름 (3~5명)</p><div class="grid">${[0,1,2,3,4].map(i=>`<input type="text" class="mb" placeholder="대원 ${i+1}${i<3?'':' (선택)'}" maxlength="6">`).join('')}</div></div>
+<p class="sub" style="margin:0 0 12px"><a href="index.html">← 1차시 게임으로</a></p><div class="card"><h3>오늘 도전할 상황 고르기 <small class="sub">(한 상황에 약 8~10분)</small></h3>${SC.map((s,i)=>`<label class="ck"><input type="checkbox" class="sl" value="${i}" ${i<3?'checked':''}> ${i+1}. ${s.t}</label>`).join('')}
+<p class="sub">⚠️ 연기는 진지하게! 등장하는 캐릭터(토끼·하마·여우)는 가상의 동물 친구들이에요. 실제 친구를 떠올리거나 흉내 내지 않아요. 힘든 마음이 들면 언제든 그만둬도 돼요.</p></div><button class="btn" id="go">🎬 촬영 시작!</button><p id="er" style="color:var(--cor)"></p>`;
+$('go').onclick=()=>{const t=$('tn').value.trim(),m=[...document.querySelectorAll('.mb')].map(x=>x.value.trim()).filter(Boolean),s=[...document.querySelectorAll('.sl:checked')].map(x=>+x.value);
+if(!t||m.length<3)return $('er').textContent='모둠 이름과 대원 3명 이상을 입력해 주세요.';if(!s.length)return $('er').textContent='상황을 한 가지 이상 골라 주세요.';
+T={team:t,mem:m,sel:s,k:0,score:0,res:[]};cut()}}
+const $=id=>document.getElementById(id);
+function cut(){clr();G.rot=null;const s=sc(),v=VIDEO[T.sel[T.k]+1];
+const vid=v?(/\.(mp4|webm)$/i.test(v)?`<video src="${v}" controls style="width:100%;border-radius:12px"></video>`:`<iframe src="${v}" style="width:100%;height:380px;border:0;border-radius:12px" allowfullscreen></iframe>`):'';
+$('app').innerHTML=head()+`<div class="card"><div class="tag">STEP 1 · 컷신 보기 (${T.k+1}/${T.sel.length})</div><h2>${s.t}</h2><p class="sub">${s.sub}</p>${vid}<div class="stage" id="sg"></div><p><button class="btn y" id="rp">↺ 다시 보기</button><button class="btn" id="nx" disabled>다음: 어떻게 할까? ▶</button></p></div>`;
+const play=()=>{$('sg').innerHTML='';$('nx').disabled=true;let i=0;clearInterval(G.c);const step=()=>{if(i>=s.beats.length){clearInterval(G.c);$('nx').disabled=false;return}const [w,m,l]=s.beats[i++];$('sg').insertAdjacentHTML('beforeend',`<div class="speak">${face(w,m)}<div class="bub"><b>${NM[w]||w}</b>${l}</div></div>`);tick(false)};step();G.c=setInterval(step,3200)};
+play();$('rp').onclick=play;$('nx').onclick=quiz}
+function quiz(){clr();const s=sc();let tries=0,done=false;
+$('app').innerHTML=head()+`<div class="card"><div class="tag">STEP 2 · 최선의 행동 고르기</div><h2>${s.q}</h2><div id="os">${s.o.map((t,i)=>`<button class="opt" data-i="${i}">${esc(t)}</button>`).join('')}</div><div id="fb"></div></div>`;
+document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{if(done||b.disabled)return;tries++;const i=+b.dataset.i;
+if(i===s.a){done=true;b.classList.add('good');const p=tries===1?3:1;add(p);fx(true);$('fb').innerHTML=`<div class="fb good">🎉 정답! +${p}점<br>${s.why}</div><p><button class="btn" id="nx">대본 받으러 가기 ▶</button></p>`;$('nx').onclick=script}
+else{b.classList.add('bad');b.disabled=true;fx(false);$('fb').innerHTML='<div class="fb bad">🤔 다시 한 번 모둠이 의논해 보세요!</div>'}})}
+let rolesMap={};
+function script(){clr();micOff();const s=sc();const roles=[...new Set(s.model.map(x=>x[0]))];
+rolesMap={};const mem=G.rot||T.mem,off=G.rot?0:T.k;roles.forEach((r,i)=>rolesMap[r]=mem[(i+off)%mem.length]);const narr=mem.length>=5?mem[(roles.length+off)%mem.length]:null,dbl=mem.length<roles.length;const nl=t=>`<div class="line"><div class="who" style="font-size:34px">📣<br><span style="font-size:13px">해설자</span><br><small class="sub">${esc(narr)}</small></div><div class="bub" style="background:var(--bg);color:var(--ink)">${t}</div></div>`;
+$('app').innerHTML=head()+`<div class="card"><div class="tag">STEP 3 · 대본 연습 & 공연</div><h2>${s.t}</h2>
+<p>${roles.map(r=>`<span class="chip">${face(r,'calm',22)} ${NM[r]||r}: <b>${esc(rolesMap[r])}</b></span>`).join('')}${narr?`<span class="chip">📣 해설자: <b>${esc(narr)}</b></span>`:''}</p>${dbl?'<p class="sub">👥 모둠이 3명이라 한 사람이 두 역할을 맡아요.</p>':''}${narr?nl(s.sub+' (해설자가 읽어 주세요)'):''}
+${s.model.map(([w,m,l])=>`<div class="line"><div class="who">${face(w,m,46)}<br>${NM[w]||w}<br><small class="sub">${esc(rolesMap[w])}</small></div><div class="bub" style="background:var(--bg);color:var(--ink)">${l}</div></div>`).join('')}
+${narr?nl('이상으로 장면을 마칩니다. 모두 박수! 👏'):''}
+<p class="sub">${s.free}</p>
+<div class="row"><div id="tm">⏱ 대기</div></div>
+<p><button class="btn y" id="rh">📖 연습 90초</button><button class="btn c" id="pf">🎬 공연 시작 (150초)</button><button class="btn" id="mc" style="background:#555">🎤 목소리 게이지</button><button class="btn" id="sh" style="background:#555">🔀 역할 섞기</button></p><p class="sub">※ 역할은 연기일 뿐이에요. 잘못하는 역(여우)은 가위바위보나 돌려가며 정하고, 같은 친구가 계속 맡지 않게 해요.</p>
+<div class="bar" id="mb2" style="display:none"><i id="mv"></i></div><p class="sub" id="mn" style="display:none">게이지는 목소리 크기만 보여 줘요. 녹음하거나 저장하지 않아요.</p>
+<button class="btn" id="nx">공연 끝! 평가하러 가기 ▶</button></div>`;
+$('rh').onclick=()=>countdown(90,()=>{$('tm').textContent='⏰ 연습 끝!';fx(true)});
+$('pf').onclick=()=>{countdown(150,()=>{$('tm').textContent='👏 공연 끝!';fx(true)})};
+$('sh').onclick=()=>{G.rot=[...T.mem].sort(()=>Math.random()-.5);script()};
+$('mc').onclick=async()=>{if(G.mic){micOff();$('mb2').style.display=$('mn').style.display='none';return}await mic();if(G.mic)$('mb2').style.display=$('mn').style.display='block'};
+$('nx').onclick=rate}
+async function mic(){try{const st=await navigator.mediaDevices.getUserMedia({audio:true}),a=new AudioContext(),an=a.createAnalyser();a.createMediaStreamSource(st).connect(an);const d=new Uint8Array(an.fftSize);G.mic={st,a};const f=()=>{if(!G.mic)return;an.getByteTimeDomainData(d);let m=0;d.forEach(v=>m=Math.max(m,Math.abs(v-128)));const e=$('mv');if(e)e.style.width=Math.min(100,m*1.8)+'%';requestAnimationFrame(f)};f()}catch(e){alert('마이크를 사용할 수 없어요. 게이지 없이 진행해도 돼요.')}}
+function micOff(){if(G.mic){G.mic.st.getTracks().forEach(t=>t.stop());try{G.mic.a.close()}catch(e){}G.mic=null}}
+const CK=['또박또박 분명한 목소리로 말했다','거절·도움 요청 같은 구체적인 행동이 들어 있었다','상대를 놀리거나 비난하지 않고 존중했다','믿을 수 있는 어른이나 도움 기관(1388)을 떠올렸다'];
+function rate(){clr();micOff();let star=-1;
+$('app').innerHTML=head()+`<div class="card"><div class="tag">STEP 4 · 평가</div><h2>우리 모둠 자체 평가 <small class="sub">(체크할 때마다 +1점)</small></h2>${CK.map((t,i)=>`<label class="ck"><input type="checkbox" class="ck1"> ${t}</label>`).join('')}
+<h3 style="margin-top:14px">선생님 별점 <small class="sub">(선생님이 눌러 주세요 · 별 1개당 +2점)</small></h3><div id="st">${[0,1,2,3].map(n=>`<button class="btn y" data-n="${n}">${n?'⭐'.repeat(n):'0'}</button>`).join('')}</div><div id="fb"></div><p><button class="btn" id="nx" disabled>${T.k+1<T.sel.length?'다음 상황으로 ▶':'결과 보기 🏆'}</button></p></div>`;
+document.querySelectorAll('#st .btn').forEach(b=>b.onclick=()=>{star=+b.dataset.n;document.querySelectorAll('#st .btn').forEach(x=>x.style.outline='none');b.style.outline='4px solid var(--pu)';$('nx').disabled=false});
+$('nx').onclick=()=>{const c=document.querySelectorAll('.ck1:checked').length,p=c+star*2;add(p);T.res.push({t:sc().t,star});fx(true);T.k++;T.k<T.sel.length?cut():end()}}
+function end(){clr();micOff();const mx=T.sel.length*13,r=T.score/mx,ti=r>=.8?'🏅 상황극 명배우 · 존중 마스터':r>=.55?'🥈 든든한 우리 편':'🥉 용기 있는 도전자';fx(true);
+$('app').innerHTML=head()+`<div class="card" style="text-align:center"><div style="font-size:60px">🎬</div><h1>촬영 종료!</h1><p class="jua" style="font-size:26px">${esc(T.team)} ⭐ ${T.score}점</p><p class="jua" style="font-size:24px">${ti}</p></div>
+<div class="card"><h3>오늘의 상황별 별점</h3>${T.res.map(x=>`<div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:6px 0"><span>${x.t}</span><b>${x.star?'⭐'.repeat(x.star):'–'}</b></div>`).join('')}</div>
+<div class="card"><h3>📝 오늘의 다짐</h3><p class="sub">내가 앞으로 기억하고 실천할 말 한 줄을 적고 발표해 보세요.</p><input type="text" placeholder="예: 싫으면 분명하게 '싫어'라고 말할 거야."><p class="sub" style="margin-top:10px">힘든 일이 생기면 보호자, 담임·보건 선생님, 청소년전화 1388에 꼭 알려요.</p></div><button class="btn y" id="re">처음부터 다시</button>`;
+$('re').onclick=intro}
+SC[0].model=[["하마", "calm", "(작은 목소리로) 토끼야, 진정해. 숨 한 번 크게 쉬어 봐. 월경은 누구나 겪는 자연스러운 일이야."], ["토끼", "worry", "근데 의자에 묻었을까 봐 못 일어나겠어. 다들 쳐다보면 어쩌지?"], ["하마", "happy", "내 카디건을 허리에 묶고 나가자. 그럼 아무도 모를 거야. 나는 오늘부터 너의 비밀 요원이야!"], ["토끼", "happy", "푸핫, 비밀 요원이라니. 조금 웃음이 난다. 고마워."], ["여우", "smirk", "야, 둘이 뭘 그렇게 속닥거려? 나도 끼워 줘!"], ["하마", "calm", "여우아, 이건 우리끼리 얘기야. 궁금해도 캐묻지 않는 게 예의야."], ["여우", "calm", "아… 알았어. 괜히 눈치 없이 굴었네. 미안."], ["하마", "calm", "(조용히 손을 들고) 선생님, 토끼가 몸이 좀 안 좋아서 보건실에 같이 다녀와도 될까요?"], ["보건샘", "happy", "(보건실에서) 어서 와요. 생리가 시작된 거죠? 걱정 마요, 정말 자주 있는 일이에요. 여기 생리대와 따뜻한 물이 있어요."], ["토끼", "worry", "선생님, 배도 조금 아픈데 괜찮을까요?"], ["보건샘", "calm", "월경통은 참지 않아도 돼요. 따뜻하게 하고 잠깐 쉬어요. 너무 아프면 병원에 가는 방법도 알려 줄게요."], ["토끼", "happy", "하마아, 오늘 네가 없었으면 정말 힘들었을 거야. 진짜 고마워."], ["하마", "happy", "다음에 내가 그럴 땐 네가 비밀 요원 해 줘야 해!"], ["여우", "calm", "(교실로 돌아온 토끼에게) 아까는 눈치 없이 굴어서 미안해. 필요하면 나도 선생님께 말해 줄게."], ["토끼", "happy", "고마워, 여우아. 그렇게 말해 주니까 마음이 편해졌어."]];
+SC[1].model=[["토끼", "angry", "(숨을 한 번 쉬고 또박또박) 여우아, 그 말 기분 나빠. 내 몸 가지고 농담하지 마."], ["여우", "smirk", "에이, 칭찬한 건데 왜 그렇게 예민해?"], ["토끼", "calm", "칭찬이든 농담이든, 듣는 내가 불쾌하면 그건 괜찮은 말이 아니야."], ["하마", "angry", "맞아. 토끼가 싫다고 분명히 말했잖아. 지금 사과해야 해."], ["여우", "smirk", "아니, 다들 그렇게 말하면 내가 나쁜 사람 같잖아…"], ["하마", "calm", "나쁜 사람이라는 게 아니야. 그 행동이 문제라는 거야. 고치면 돼."], ["여우", "worry", "…생각해 보니 몸 얘기로 웃기려고 했던 건 맞아. 토끼야, 미안해."], ["토끼", "calm", "사과해 줘서 고마워. 앞으로는 몸 얘기로 놀리지 말아 줘."], ["여우", "happy", "알겠어. 약속할게. 대신 웃긴 얘기는 다른 걸로 해 볼게!"], ["하마", "happy", "좋아, 그럼 오늘 점심시간에 웃긴 얘기 대회 하자. 몸 얘기는 빼고!"], ["토끼", "happy", "대회 우승 상품은 내가 쏠게. 젤리 하나!"], ["보건샘", "calm", "(지나가다가) 무슨 일이니? 아, 서로 이야기를 잘 풀었구나. 그래도 비슷한 일이 또 생기면 꼭 선생님께 알려 주렴."], ["토끼", "happy", "네, 감사합니다. 오늘은 제가 제 마음을 말했어요!"]];
+SC[2].model=[["토끼", "angry", "싫어. 만지지 마. 나는 그런 장난 싫어."], ["여우", "smirk", "에이, 그냥 장난이잖아. 별거 아닌데 왜 그래?"], ["토끼", "angry", "내가 싫다고 했어. 싫다고 말했는데도 계속하면 그건 장난이 아니야."], ["여우", "smirk", "다른 애들도 다 하는데?"], ["하마", "angry", "다른 사람이 하는 건 상관없어. 토끼가 싫다고 했으니까 그만둬야 해."], ["여우", "calm", "아니, 다들 왜 이렇게 진지해…"], ["토끼", "calm", "(자리에서 일어나며) 나는 이 일을 선생님께 말씀드릴 거야. 하마아, 같이 가 줄래?"], ["하마", "happy", "당연하지. 네가 말할 때 옆에서 같이 있어 줄게."], ["보건샘", "calm", "어서 와요. 무슨 일이죠? 천천히 말해도 돼요. 선생님은 끝까지 들을 준비가 됐어요."], ["토끼", "worry", "여우가 장난이라면서 제 몸을 계속 만졌어요. 싫다고 했는데도 멈추지 않았어요."], ["보건샘", "calm", "말해 줘서 고마워요. 네 잘못이 아니에요. 싫다고 말한 건 정말 용감한 행동이었어요."], ["보건샘", "calm", "여우와도 이야기해서 앞으로 이런 일이 없도록 도울게요. 힘들 때는 청소년전화 1388에도 연락할 수 있다는 걸 기억해요."], ["토끼", "happy", "네, 말하고 나니까 마음이 한결 가벼워졌어요."], ["하마", "happy", "앞으로도 불편한 일이 있으면 바로 나한테 말해. 알았지?"]];
+SC[3].model=[["하마", "angry", "여우아, 내 사진을 내 동의 없이 단톡방에 올렸잖아. 지금 바로 삭제해 줘."], ["여우", "smirk", "웃기잖아~ 다들 웃는데 뭘 그래?"], ["토끼", "angry", "웃을 일이 아니야. 사진은 찍힌 사람이 허락해야 올릴 수 있어."], ["토끼", "calm", "하마아, 일단 화면을 캡처해 두자. 증거가 있어야 나중에 도움을 받을 수 있어."], ["하마", "worry", "…고마워. 사실 좀 창피하고 무서웠어."], ["토끼", "calm", "당연한 마음이야. 너는 아무 잘못 없어. 같이 선생님께 가자."], ["여우", "worry", "아, 그 정도일 줄은 몰랐어. 이제 삭제하면 되잖아?"], ["하마", "calm", "삭제는 꼭 해야 해. 하지만 이미 퍼진 일이라 선생님께도 알릴 거야."], ["보건샘", "calm", "(교무실에서) 잘 말해 줬어요. 증거를 남겨 둔 것도 정말 잘했어요. 단톡방에 삭제와 사과를 요청할게요."], ["여우", "worry", "…하마아, 미안해. 내가 가볍게 생각하고 올렸어. 앞으로는 동의 없이 안 올릴게."], ["하마", "calm", "사과는 받을게. 다음엔 꼭 먼저 물어봐 줘."], ["보건샘", "happy", "동의 없이 올린 사진은 법적 문제가 될 수도 있어요. 올리기 전에 \"이 사람이 허락했나?\"를 꼭 떠올려요."], ["토끼", "happy", "우리 반 단톡방에 \"사진은 동의받고 올리기\" 규칙을 만들어 볼까?"], ["하마", "happy", "좋아, 규칙 만드는 건 내가 맡을게!"]];
+SC[4].model=[["낯선계정", "calm", "안녕~ 너 정말 예쁘더라. 사진 한 장만 더 보내 줄래? 비밀로 해 줄게."], ["토끼", "worry", "어… 모르는 사람인데? 비밀로 하자는 말이 이상해."], ["하마", "worry", "잠깐, 그건 위험한 신호야. 모르는 사람이 비밀로 하자고 하면 일단 의심해야 해."], ["토끼", "angry", "안 보낼 거예요. 그런 부탁은 하지 마세요."], ["낯선계정", "calm", "에이, 한 장만 보내 주면 선물도 줄게. 우리 친해지자~"], ["하마", "angry", "선물로 꾀는 것도 위험한 신호야. 더 대답하지 말고 바로 차단하자."], ["토끼", "calm", "응, 차단할게. 그 전에 화면을 캡처해 두자."], ["하마", "calm", "좋아. 캡처하고 차단까지 했으면 이제 어른께 알려야 해."], ["토끼", "worry", "근데 혼나면 어쩌지? 내 잘못일까 봐 걱정돼."], ["하마", "calm", "아니야, 네 잘못이 아니야. 이런 일은 어른들이 도와줘야 하는 일이야."], ["보건샘", "happy", "말해 줘서 정말 고마워요. 거절하고, 캡처하고, 차단하고, 알린 거예요. 완벽했어요!"], ["보건샘", "calm", "이런 일이 생기면 보호자나 선생님, 청소년전화 1388에 꼭 알려요. 모르는 사람의 사진 요구에는 절대 응하지 않아도 돼요."], ["토끼", "happy", "오늘 배운 순서를 꼭 기억할게요. 거절, 캡처, 차단, 알리기!"], ["하마", "happy", "우리 반 친구들한테도 알려 주자!"]];
+intro();
+</script></body></html>
